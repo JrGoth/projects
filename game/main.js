@@ -1,4 +1,5 @@
 var open = false
+var scoretext = []
 chestlist =[]
 var key = {}
 var score = 0
@@ -43,15 +44,29 @@ function Player(){
 	this.walkDownY = [4,4,4]
 	this.step = 0
 }
+
+function LeaderBoard(){
+	this.container = appendHTML('div','body')
+	this.scoreboard = this.container
+	this.scoreboard.id = 'scoreboard'
+	
+}
+
+
 //iniatilize objects
+var leaderBoard = new LeaderBoard()
 var player = new Player()
 var chest = randomItemGen(Chest)
 
+
+//main program function calls
 loop()
 
 
-function loop(){
 
+var newScore = 0
+//utils
+function loop(){	
 	update()
 	render()
 
@@ -98,7 +113,7 @@ function checkChestY(){
 
 
 function drawchest(){
-	if(chestlist.length < 3){
+	if(chestlist.length < 5){
 		for(var i = 0; i < 1; i++){
 			chestlist.push(randomItemGen(Chest))
 		}
@@ -111,12 +126,11 @@ function drawchest(){
 			(player.y + 32) >= chestlist[i].y && (player.y) <= (chestlist[i].y +32)){
 			delete chestlist[i]
 			score += 100
-			console.log(score)
 			setTimeout(function(){
 				for(var i = 0; i < 1; i++){
 				chestlist.push(randomItemGen(Chest))
 			}
-			},2000)
+			},5000)
 			
 		}
 	}	
@@ -129,10 +143,16 @@ function loadimg(imgpath){
 	return img
 }
 
-function appendHTML(tag,parent){
+function appendHTML(tag,parent,text){
 	var ele = document.createElement(tag)
+	if(tag === 'p'){
+		var t = document.createTextNode(text)
+		ele.appendChild(t)
+	}else{
+	text = ""
+	}
 	var p = document.querySelector(parent)
-	p.appendChild(ele)
+	p.appendChild(ele)	
 	return ele
 }
 
@@ -161,7 +181,12 @@ function render(){
 }
 
 function update(){
-	//right
+	updateScore()
+	controls()
+}
+
+function controls(){
+		//right
 	if(key[68]){
 		var step = (player.step % player.walkRightX.length) | 0
 		player.x += 1
@@ -192,6 +217,19 @@ function update(){
 		player.sx = player.walkDownX[step]
 		player.sy = player.walkDownY[step]
 		player.step+= .1
-	}
+	}	
 }
 
+function updateScore(){
+
+	if(newScore < score){
+		newScore = score
+		
+		var y = appendHTML('p','#scoreboard',"Score: " + score.toString())
+			scoretext.push(y)
+			if(scoretext.length > 1){
+				scoretext[0].remove()
+				scoretext.splice(0,1)				
+			}
+		}
+}

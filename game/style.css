@@ -1,0 +1,16 @@
+canvas {
+	border:solid;
+}
+body {
+	display: inline-block;
+	text-align: center;
+	margin-left: 400px;
+}
+#scoreboard {
+	width: 200px;
+	height: 600px;
+	border:solid;
+	background-color: pink;
+	float: right;
+	overflow-y: scroll;
+}
