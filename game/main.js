@@ -1,6 +1,8 @@
+var count = 0
 var open = false
 var scoretext = []
-chestlist =[]
+var chestlist = []
+var PowerUplist = []
 var key = {}
 var score = 0
 
@@ -33,6 +35,10 @@ function Player(){
 	this.sx = 4
 	this.sy = 4
 
+	this.velx = 2.5
+	this.vely = 2.5
+
+	this.buff = 0
 	this.img = loadimg('assets/sprites.png')
 	this.walkRightX = [4,3,5]
 	this.walkRightY = [6,6,6]
@@ -43,6 +49,15 @@ function Player(){
 	this.walkDownX = [4,3,5]
 	this.walkDownY = [4,4,4]
 	this.step = 0
+}
+
+function PowerUps(x,y){
+	this.x = x
+	this.y = y
+	this.width = 8
+	this.height = 8
+	this.color = 'red'
+
 }
 
 function LeaderBoard(){
@@ -57,7 +72,7 @@ function LeaderBoard(){
 var leaderBoard = new LeaderBoard()
 var player = new Player()
 var chest = randomItemGen(Chest)
-
+var pwrUps = randomItemGen(PowerUps)
 
 //main program function calls
 loop()
@@ -66,7 +81,8 @@ loop()
 
 var newScore = 0
 //utils
-function loop(){	
+function loop(){
+	count++	
 	update()
 	render()
 
@@ -175,7 +191,9 @@ document.addEventListener('keyup', function(e){
 
 
 function render(){
+	scrn.ctx.clearRect(0,0,scrn.canvas.width,scrn.canvas.height)
 	drawBackground()
+	drawPowerUps()
 	drawchest()
 	drawPlayer()
 }
@@ -186,41 +204,53 @@ function update(){
 }
 
 function controls(){
-		//right
-	if(key[68]){
-		var step = (player.step % player.walkRightX.length) | 0
-		player.x += 1
-		player.sx = player.walkRightX[step]
-		player.sy = player.walkRightY[step]
-		player.step+=.1
-	}
-	//left
-	if(key[65]){
-		var step = (player.step % player.walkRightX.length) | 0
-		player.x -= 1
-		player.sx = player.walkLeftX[step]
-		player.sy = player.walkLeftY[step]
-		player.step+=.1
-	}
-	//up
-	if(key[87]){
-		var step = (player.step % player.walkRightX.length) | 0
-		player.y -= 1
-		player.sx = player.walkUpX[step]
-		player.sy = player.walkUpY[step]
-		player.step+=.1
-	}
-	//down
-	if(key[83]){
-		var step = (player.step % player.walkRightX.length) | 0
-		player.y += 1
-		player.sx = player.walkDownX[step]
-		player.sy = player.walkDownY[step]
-		player.step+= .1
-	}	
+			//right
+		if(key[68]){
+			if(player.x + 32 <= scrn.canvas.width){
+				var step = (player.step % player.walkRightX.length) | 0
+				player.x += player.velx + player.buff
+				player.sx = player.walkRightX[step]
+				player.sy = player.walkRightY[step]
+				player.step+=.1	
+			}
+			
+		}
+		//left
+		if(key[65]){
+			if(player.x > 0){
+				var step = (player.step % player.walkRightX.length) | 0
+				player.x -= player.velx + player.buff
+				player.sx = player.walkLeftX[step]
+				player.sy = player.walkLeftY[step]
+				player.step+=.1	
+			}
+			
+		}
+		//up
+		if(key[87]){
+			if(player.y > 0){
+				var step = (player.step % player.walkRightX.length) | 0
+				player.y -= player.vely + player.buff
+				player.sx = player.walkUpX[step]
+				player.sy = player.walkUpY[step]
+				player.step+=.1	
+			}
+			
+		}
+		//down
+		if(key[83]){
+			if(player.y + 32 < scrn.canvas.height){
+				var step = (player.step % player.walkRightX.length) | 0
+				player.y += player.vely + player.buff
+				player.sx = player.walkDownX[step]
+				player.sy = player.walkDownY[step]
+				player.step+= .1	
+				}			
+			}	
 }
 
 function updateScore(){
+
 
 	if(newScore < score){
 		newScore = score
@@ -232,4 +262,34 @@ function updateScore(){
 				scoretext.splice(0,1)				
 			}
 		}
+}
+
+function drawPowerUps(){
+	if(count === 600){
+		PowerUplist.push(randomItemGen(PowerUps))
+		count = 0
+		}
+		for(var pwrup in PowerUplist){
+			scrn.ctx.fillStyle = PowerUplist[pwrup].color
+			scrn.ctx.fillRect(PowerUplist[pwrup].x,PowerUplist[pwrup].y,PowerUplist[pwrup].width,PowerUplist[pwrup].height)
+
+			if((player.x + 32) >= PowerUplist[pwrup].x && (player.x) <= (PowerUplist[pwrup].x + 8) &&
+				(player.y + 32) >= PowerUplist[pwrup].y && (player.y) <= (PowerUplist[pwrup].y + 8)){
+				delete PowerUplist[pwrup]
+				speedBuff()
+				}
+			}	
+		if(PowerUplist.length === 1){
+			setTimeout(function(){
+				PowerUplist.splice(0,1)
+			},5000)
+		}
+
+}
+
+function speedBuff(){
+	player.buff = player.velx * 2
+	setTimeout(function(){
+		player.buff = 0
+	},3000)
 }
