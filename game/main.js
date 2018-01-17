@@ -3,6 +3,7 @@ var open = false
 var scoretext = []
 var chestlist = []
 var PowerUplist = []
+var monsterlist = []
 var key = {}
 var score = 0
 
@@ -24,6 +25,7 @@ function Chest(x,y){
 	this.sx = checkChestX()
 	this.sy = checkChestY()
 	this.img = loadimg('assets/chests.png')
+	this.count = 0
 }
 
 function Player(){
@@ -51,12 +53,38 @@ function Player(){
 	this.step = 0
 }
 
+function Monster(x,y){
+	this.width = 32
+	this.height = 32
+	this.x = x
+	this.y = y
+
+	this.sx = 4
+	this.sy = 4
+
+	this.velx = 2.5
+	this.vely = 2.5
+
+	this.img = loadimg('assets/bat.png')
+	this.walkRightX = [2,3,2,1]
+	this.walkRightY = [1,1,1,1]
+	this.walkLeftX =[2,3,2,1]
+	this.walkLeftY =[3,3,3,3]
+	this.walkUpX = [2,3,2,1]
+	this.walkUpY = [2,2,2,2]
+	this.walkDownX = [2,3,2,1]
+	this.walkDownY = [1,1,1,1]
+	this.step = 0
+	this.timer = 0
+}
+
 function PowerUps(x,y){
 	this.x = x
 	this.y = y
 	this.width = 8
 	this.height = 8
 	this.color = 'red'
+	this.timer = 0
 
 }
 
@@ -73,6 +101,7 @@ var leaderBoard = new LeaderBoard()
 var player = new Player()
 var chest = randomItemGen(Chest)
 var pwrUps = randomItemGen(PowerUps)
+var bat = randomItemGen(Monster)
 
 //main program function calls
 loop()
@@ -82,7 +111,6 @@ loop()
 var newScore = 0
 //utils
 function loop(){
-	count++	
 	update()
 	render()
 
@@ -92,8 +120,9 @@ function loop(){
 
 
 function drawBackground(){
-	scrn.ctx.fillStyle = 'black'
-	scrn.ctx.fillRect(0,0,scrn.canvas.width,scrn.canvas.height)
+	var background = loadimg('assets/throne.jpg')
+	//scrn.ctx.fillStyle = 'black'
+	scrn.ctx.drawImage(background,0,0,background.width,background.height,0,0,scrn.canvas.width,scrn.canvas.height)
 }
 
 function drawPlayer(){
@@ -129,10 +158,12 @@ function checkChestY(){
 
 
 function drawchest(){
-	if(chestlist.length < 5){
+	chest.count ++
+	if(chest.count === 120 && chestlist.length <= 5){
 		for(var i = 0; i < 1; i++){
 			chestlist.push(randomItemGen(Chest))
 		}
+		chest.count = 0
 	}
 
 	for(var i in chestlist){
@@ -143,10 +174,10 @@ function drawchest(){
 			delete chestlist[i]
 			score += 100
 			setTimeout(function(){
-				for(var i = 0; i < 1; i++){
-				chestlist.push(randomItemGen(Chest))
-			}
-			},5000)
+				chestlist.push(randomItemGen(Chest))	
+			},2000)
+					
+
 			
 		}
 	}	
@@ -172,15 +203,6 @@ function appendHTML(tag,parent,text){
 	return ele
 }
 
-document.addEventListener('click', function(e){
-	if(open === true){
-		open = false
-	}else{
-		open = true
-	}
-	console.log(open)
-})
-
 document.addEventListener('keydown', function(e){
 	key[e.keyCode] = true
 })
@@ -195,6 +217,7 @@ function render(){
 	drawBackground()
 	drawPowerUps()
 	drawchest()
+	drawMonster()
 	drawPlayer()
 }
 
@@ -265,6 +288,7 @@ function updateScore(){
 }
 
 function drawPowerUps(){
+	count ++
 	if(count === 600){
 		PowerUplist.push(randomItemGen(PowerUps))
 		count = 0
@@ -278,11 +302,13 @@ function drawPowerUps(){
 				delete PowerUplist[pwrup]
 				speedBuff()
 				}
-			}	
-		if(PowerUplist.length === 1){
-			setTimeout(function(){
+			}
+	if(PowerUplist.length === 1){
+		pwrUps.timer ++
+			if (pwrUps.timer === 180){
 				PowerUplist.splice(0,1)
-			},5000)
+				pwrUps.timer = 0
+			}
 		}
 
 }
@@ -292,4 +318,18 @@ function speedBuff(){
 	setTimeout(function(){
 		player.buff = 0
 	},3000)
+}
+
+function drawMonster(){
+	bat.timer++
+	if(bat.timer === 180){
+		monsterlist.push(randomItemGen(Monster))
+		bat.timer = 0
+	}
+	for(var mons in monsterlist){
+		scrn.ctx.drawImage(monsterlist[mons].img,monsterlist[mons].sx,monsterlist[mons].sy,32,32,
+		monsterlist[mons].x,monsterlist[mons].y,32,32)
+
+		monsterlist[mons].x += 2
+	}
 }
