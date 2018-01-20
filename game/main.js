@@ -64,6 +64,7 @@ function Monster(x,y){
 
 	this.velx = 2.5
 	this.vely = 2.5
+	this.edge = false
 
 	this.img = loadimg('assets/bat.png')
 	this.walkRightX = [2,3,2,1]
@@ -326,10 +327,25 @@ function drawMonster(){
 		monsterlist.push(randomItemGen(Monster))
 		bat.timer = 0
 	}
+	
 	for(var mons in monsterlist){
 		scrn.ctx.drawImage(monsterlist[mons].img,monsterlist[mons].sx,monsterlist[mons].sy,32,32,
 		monsterlist[mons].x,monsterlist[mons].y,32,32)
+		if(monsterlist[mons].edge === false ){
+			monsterlist[mons].x += 2
+			if(monsterlist[mons].x + 32 === scrn.canvas.width){
+				monsterlist[mons].edge = true
+				console.log(monsterlist[mons].edge)
+			}
+		}
+		if(monsterlist[mons].edge === true){
+			monsterlist[mons].x -= 2
+			if(monsterlist[mons].x === 0){
+				monsterlist[mons].edge = false
 
-		monsterlist[mons].x += 2
+			}
+		}
+
+
 	}
 }
